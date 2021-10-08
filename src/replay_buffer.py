@@ -36,8 +36,8 @@ class ReplayBuffer():
 
         return self.prepare_batch(batch)
 
-    def prepare_batch(self, batch, is_w=[]):
-        if is_w == []:
+    def prepare_batch(self, batch, is_w=None):
+        if is_w is None:
             is_w = [1.0] * len(batch)
 
         states = torch.from_numpy(np.vstack([e.state for e in batch if e is not None])).float()

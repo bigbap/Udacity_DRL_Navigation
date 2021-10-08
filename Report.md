@@ -19,7 +19,7 @@ The separate `Neural Nets` are:
 -  `dqn_local`. This is the predictor network
 -  `dqn_target`. This is the target network
 
-#### Neurals Nets
+### Neurals Nets
 Bearing in mind that the environment has `state_space_n = 37` and `action_space_n = 4`, each neural net has the following layers:
  - `input layer = linear(state_space_n, 50)`
  - `hidden layer = linear(50, 50)`
@@ -29,7 +29,7 @@ The input layer and the hidden layer pass through a `leaky_relu()` activation fu
 
 The output layer doesn't pass through an activation function.
 
-#### Training Hyper-parameters
+### Training Hyper-parameters
 All agents were trained with the following hyper-parameters:
 -  `gamma = 1`
 -  `lr = 0.001`

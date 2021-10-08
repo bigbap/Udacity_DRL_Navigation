@@ -2,7 +2,7 @@ import torch
 import torch.nn.functional as F
 import torch.optim as optim
 import numpy as np
-from src.replay_buffer import ReplayBuffer, PriorityReplayBuffer
+from src.replay_buffer import ReplayBuffer
 from src.model import Model
 
 EP_START = 1
@@ -13,9 +13,6 @@ GAMMA = 0.9
 TAU = 1e-3
 
 LEARN_EVERY = 4
-
-DEFAULT_BUFFER_SIZE = 1000
-DEFAULT_BATCH_SIZE = 64
 
 def DQN_algo(**kwargs):
     gamma = kwargs["gamma"]
@@ -34,8 +31,8 @@ def DoubleDQN_algo(**kwargs):
 
 class Agent():
     def __init__(self, state_space_n, action_space_n, learn_every=LEARN_EVERY, gamma=GAMMA, lr=LR,
-                 ep_decay=EP_DECAY, ep_start=EP_START, ep_min=EP_MIN, buffer_size=DEFAULT_BUFFER_SIZE, 
-                 batch_size=DEFAULT_BATCH_SIZE, model=None, seed=None, targets_algo=DQN_algo, priority_alpha=None):
+                 ep_decay=EP_DECAY, ep_start=EP_START, ep_min=EP_MIN, model=None, seed=None, targets_algo=DQN_algo, 
+                 replay_buffer=ReplayBuffer()):
 
         self.state_space_n = state_space_n
         self.action_space_n = action_space_n
@@ -56,13 +53,7 @@ class Agent():
         self.loss_fn = F.mse_loss
         self.optimizer = optim.Adam(self.dqn_local.parameters(), lr)
 
-        self.buffer_size = buffer_size
-        self.batch_size = batch_size
-
-        if priority_alpha != None:
-            self.replay_buffer = PriorityReplayBuffer(buffer_size, batch_size, alpha=priority_alpha)
-        else:
-            self.replay_buffer = ReplayBuffer(buffer_size, batch_size)
+        self.replay_buffer = replay_buffer
 
         self.t_step = 1
 
@@ -86,7 +77,7 @@ class Agent():
     def step(self, state, action, reward, state_prime, done):
         self.replay_buffer.add(state, action, reward, state_prime, done)
 
-        if len(self.replay_buffer) >= self.batch_size and self.t_step % self.learn_every == 0:
+        if len(self.replay_buffer) >= self.replay_buffer.batch_size and self.t_step % self.learn_every == 0:
             self._learn()
 
             # update target network

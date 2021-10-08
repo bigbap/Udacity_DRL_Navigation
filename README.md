@@ -3,7 +3,7 @@ This is the P1 project for the Deep Reinforcement Learning Nanodegree on https:/
 
 The goal of this project is to create an agent that can be trained to navigate a large world, collecting as many yellow bananas as possible while ignoring the blue ones.
 
-Banana world is an episodic and continuous environment where yellow and blue bananas are randomly dropped into the environment. The player receives a score of **-1 for walking over a blue banana** and a score of **1 for walking over a yellow one**. An example of the trained agent can be seen in the gif below.
+Banana world is an episodic and continuous environment where yellow and blue bananas are randomly dropped into the environment. The player receives a reward of **-1 for walking over a blue banana** and **1 for walking over a yellow one**. An example of the trained agent can be seen in the gif below.
 
 ![trained agent](https://i.imgur.com/0JG7ud8.gif)
 

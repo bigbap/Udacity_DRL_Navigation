@@ -3,6 +3,14 @@ from numpy import random as rnd
 from src.sum_tree import SumTree
 import torch
 
+DEFAULT_BUFFER_SIZE = 1000
+DEFAULT_BATCH_SIZE = 64
+
+PRIORITY_ALPHA = 0.3
+EP = 0.01
+BETA = 0.4
+BETA_INCREMENT = 0.001
+
 class Experience:
     def __init__(self, state, action, reward, state_prime, done, idx):
         self.state = state
@@ -13,7 +21,7 @@ class Experience:
         self.idx = idx
 
 class ReplayBuffer():
-    def __init__(self, max_length, batch_size):
+    def __init__(self, max_length=DEFAULT_BUFFER_SIZE, batch_size=DEFAULT_BATCH_SIZE):
         self.max_length = max_length
         self.batch_size = batch_size
 
@@ -56,15 +64,8 @@ class ReplayBuffer():
     def __len__(self):
         return len(self.buffer)
 
-### PRIORITY REPLAY BUFFER ###
-
-PRIORITY_ALPHA = 0.3
-EP = 0.01
-BETA = 0.4
-BETA_INCREMENT = 0.001
-
 class PriorityReplayBuffer(ReplayBuffer):
-    def __init__(self, max_length, batch_size, alpha=PRIORITY_ALPHA, ep=EP, beta=BETA, beta_increment=BETA_INCREMENT):
+    def __init__(self, max_length=DEFAULT_BUFFER_SIZE, batch_size=DEFAULT_BATCH_SIZE, alpha=PRIORITY_ALPHA, ep=EP, beta=BETA, beta_increment=BETA_INCREMENT):
         super().__init__(max_length, batch_size)
         
         self.max_priority = 10000.0

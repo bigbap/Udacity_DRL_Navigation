@@ -1,0 +1,9 @@
+environment
+__pycache__
+.vscode
+unity-environment.log
+.ipynb_checkpoints
+.psc-ide-port
+.DS_Store
+train.py
+tests.ipynb

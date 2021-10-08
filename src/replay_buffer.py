@@ -73,8 +73,6 @@ class PriorityReplayBuffer(ReplayBuffer):
         self.beta_increment = beta_increment
 
         self.get_priority = lambda td: (np.abs(td) + ep) ** alpha
-        self.get_is_weights = lambda sp: (len(self) * sp) ** -self.beta
-        self.sample_one = lambda s, i: self.tree.sample(rnd.uniform(s * i, s * (i + 1)))
 
         self.tree = SumTree(max_entries=max_length)
 
@@ -94,17 +92,17 @@ class PriorityReplayBuffer(ReplayBuffer):
         batch = []
         priorities = []
         for i in range(self.batch_size):
-            idx, priority = self.sample_one(segment, i)
+            idx, priority = self.tree.sample(rnd.uniform(segment * i, segment * (i + 1)))
             batch.append(self.buffer[idx])
             priorities.append(priority)
 
         self.beta = np.min([1., self.beta + self.beta_increment])
 
-        probabilities = priorities / self.tree.total()
-        is_weights = self.get_is_weights(probabilities)
-        is_weights /= np.max(is_weights)
+        sample_probs = priorities / self.tree.total()   # calculate probabilities
+        is_w = (len(self) * sample_probs) ** -self.beta # calculate is_weights
+        is_w /= np.max(is_w)                            # normalize is_weights
 
-        return self.prepare_batch(batch, is_w=is_weights)
+        return self.prepare_batch(batch, is_w=is_w)
 
     def update_td(self, idx, predictions, targets):
         errors = (targets - predictions).data.numpy()

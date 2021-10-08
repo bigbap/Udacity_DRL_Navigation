@@ -2,7 +2,7 @@ from unityagents import UnityEnvironment
 
 class Environment:
     def __init__(self, no_graphics=True, seed=0):
-        self.env = UnityEnvironment(file_name="./environment/Banana", no_graphics=no_graphics, seed=seed)
+        self.env = UnityEnvironment(file_name="./environment/Banana.exe", no_graphics=no_graphics, seed=seed)
         
         # get the default brain
         self.brain_name = self.env.brain_names[0]

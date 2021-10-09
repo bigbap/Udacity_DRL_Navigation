@@ -40,7 +40,3 @@ Open `Navigation.ipynb` with **Jupyter Notebook** and follow the instructions to
 If you want to watch the trained agent playing, open `NavigationPlay.ipynb` with **Jupyter Notebook** and follow the instructions.
 
 *Note: if you get any errors, please ensure that you have followed all the instructions in the **Getting started** section. Pay special attention to the dependencies and their versions. If you are not sure what packages you have installed, use `conda list` to list all the installed packages and their versions for the activated environment*
-
-## Running the tests
-
-Open up **PowerShell** and type `python -m unittest -v` to run the unit tests.

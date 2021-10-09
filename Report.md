@@ -89,24 +89,23 @@ Pseudocode for the baseline DQN algorithm is as follows:
 2.	initialize DQN and DQN_ with random weights
 
 3.	initialize k, gamma, e = ep_start, lr
-4.	gamma 		= discount factor
 
-5.	for episode 1, M do
-6.		s 				-> get initial state from environment
-7.		d 				= false
-8.		while not d
-9.			a 			-> with probability e select random a, otherwise max(DQN(s))
-10.			r, s_, d 		-> get (r, s_, d) from environment after executing a
-11.			D 			-> store transition tuple (s, a, r, s_, d) in D
+4.	for episode 1, M do
+5.		s 				-> get initial state from environment
+6.		d 				= false
+7.		while not d
+8.			a 			-> with probability e select random a, otherwise max(DQN(s))
+9.			r, s_, d 		-> get (r, s_, d) from environment after executing a
+10.			D 			-> store transition tuple (s, a, r, s_, d) in D
 			
-12.			every k
-13.				s, a, r, s_ 	-> sample random minibatch of transitions from D
-14.				prediction 		-> predict s value - DQN(s)[a]
-15.				target 			-> get traget value - r + (gamma * max(DQN_(s_)) * (1 - d))
+11.			every k
+12.				s, a, r, s_ 	-> sample random minibatch of transitions from D
+13.				prediction 		-> predict s value - DQN(s)[a]
+14.				target 			-> get traget value - r + (gamma * max(DQN_(s_)) * (1 - d))
 
-16.				error 			-> calculate mean squared error - MSE(prediction, target)
-17.				update DQN		-> pass gradients w.r.t error through Adam optimizer
-18.				DQN_ 			-> perform a soft update of DQN_ from DQN
+15.				error 			-> calculate mean squared error - MSE(prediction, target)
+16.				update DQN		-> pass gradients w.r.t error through Adam optimizer
+17.				DQN_ 			-> perform a soft update of DQN_ from DQN
 ```
 
 The baseline agent was able to solve the environment in 1831 episodes.

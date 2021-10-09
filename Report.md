@@ -82,24 +82,24 @@ Pseudocode for the baseline DQN algorithm is as follows:
 2.	initialize DQN and DQN_ with random weights
 
 3.	k 		= learning interval
-4.	gamma 	= discount factor
+4.	gamma 		= discount factor
 
 5.	for episode 1, M do
 6.		s 				-> get initial state from environment
 7.		d 				= false
 8.		while not d
 9.			a 			-> with probability e select random a, otherwise max(DQN(s))
-10.			r, s_, d 	-> get (r, s_, d) from environment after executing a
+10.			r, s_, d 		-> get (r, s_, d) from environment after executing a
 11.			D 			-> store transition tuple (s, a, r, s_, d) in D
 			
 12.			every k
 13.				s, a, r, s_ 	-> sample random minibatch of transitions from D
-14.				prediction 		-> predict s value - DQN(s)[a]
-15.				target 			-> get traget value - r + (gamma * max(DQN_(s_)) * (1 - d))
+14.				prediction 	-> predict s value - DQN(s)[a]
+15.				target 		-> get traget value - r + (gamma * max(DQN_(s_)) * (1 - d))
 
-16.				loss 			-> calculate mean squared error - MSE(prediction, target)
+16.				loss 		-> calculate mean squared error - MSE(prediction, target)
 17.				perform gradient descent step on DQN
-18.				DQN_ 			-> perform a soft update of DQN_ from DQN
+18.				DQN_ 		-> perform a soft update of DQN_ from DQN
 ```
 
 The baseline agent was able to solve the environment in 1831 episodes.

@@ -211,4 +211,5 @@ Below is a side by side comparison of each agent learning to solve Banana world.
 
 ## 3. Ideas for the Future
 
-- implement duelling DQN
+1. Dueling DQN architecture. [Dueling Network Architectures for Deep Reinforcement Learning](https://arxiv.org/abs/1511.06581)
+2. The agent seems to sometimes get stuck in a loop between 2 states. While I can sort of correct this by adding some stochasticity to the trained agent's actions, this doesn't seem ideal. If too much randomness is added, the agent's actions are too noisy and if too little, the agent will still get stuck. One idea I had was to intruduce previous observations into the agents overall observation space. So instead of only observing the state at `t`, the observation would be a concatenation of `t, t-1...t-n`. I'm not sure if this will work, but it seems to make sense since it's less like that the previous `n` observations will occur multiple times in that order.

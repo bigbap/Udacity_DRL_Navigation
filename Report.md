@@ -45,7 +45,7 @@ The output layer doesn't pass through an activation function.
 ### 1.2. Experience Replay Buffer
 The experience replay buffer is a list with a max length that stores experience tuples `(s, a, r, s_)`. At each time step, prediction is done using the Q network and the resulting experience tuple is stored in the replay buffer.
 
-At regular intervals `(learning interval k)`, a batch of experience tuples is randomly sampled from the buffer and used to train the Q network.
+At regular intervals `k`, a batch of experience tuples is randomly sampled from the buffer and used to train the Q network.
 
 Once the buffer is full, new experience tuples are added to the beginning of the list, replacing the old tuples that were there.
 
@@ -56,9 +56,9 @@ Once the buffer is full, new experience tuples are added to the beginning of the
 2. 	initialize buffer M = empty list
 3. 	initialize batch size B
 
-4. 	add experience E -> 
+4. 	add E -> 
 5. 		H 			= (H + 1) mod N
-6.		E 			-> into M at position H
+6.		M 			-> add experience E into M at position H
 
 7. 	sample ->
 8.		initialize minibatch MB = empty list
@@ -68,14 +68,16 @@ Once the buffer is full, new experience tuples are added to the beginning of the
 11.		return MB
 ```
 
-### 1.3. Hyper-parameters
+### 1.3. Hyper-parameters, Loss Function and Optimiser
 All agents were trained with the following hyper-parameters:
--  `gamma = 1`
--  `lr = 0.001`
--  `ep_start = 1`
--  `ep_min = 0.01`
--  `ep_decay = 0.99`
--  `learn_every = 4` learning interval
+-  `gamma = 1` 			discount factor
+-  `lr = 0.001` 		learning rate
+-  `ep_start = 1` 		exploration start value
+-  `ep_min = 0.01`		exploration min value
+-  `ep_decay = 0.99`	exploration decay modifier
+-  `k = 4` 				learning interval
+
+The error function was `mean squared error` for all agents and the optimizer algorithm was `Adam`.
 
 ### 1.4. Baseline DQN Algorithm
 Pseudocode for the baseline DQN algorithm is as follows:
@@ -86,7 +88,7 @@ Pseudocode for the baseline DQN algorithm is as follows:
 1.	initialize experience replay D with capacity N
 2.	initialize DQN and DQN_ with random weights
 
-3.	k 		= learning interval
+3.	initialize k, gamma, e = ep_start, lr
 4.	gamma 		= discount factor
 
 5.	for episode 1, M do
@@ -99,12 +101,12 @@ Pseudocode for the baseline DQN algorithm is as follows:
 			
 12.			every k
 13.				s, a, r, s_ 	-> sample random minibatch of transitions from D
-14.				prediction 	-> predict s value - DQN(s)[a]
-15.				target 		-> get traget value - r + (gamma * max(DQN_(s_)) * (1 - d))
+14.				prediction 		-> predict s value - DQN(s)[a]
+15.				target 			-> get traget value - r + (gamma * max(DQN_(s_)) * (1 - d))
 
-16.				loss 		-> calculate mean squared error - MSE(prediction, target)
-17.				perform gradient descent step on DQN
-18.				DQN_ 		-> perform a soft update of DQN_ from DQN
+16.				error 			-> calculate mean squared error - MSE(prediction, target)
+17.				update DQN		-> pass gradients w.r.t error through Adam optimizer
+18.				DQN_ 			-> perform a soft update of DQN_ from DQN
 ```
 
 The baseline agent was able to solve the environment in 1831 episodes.
@@ -155,25 +157,36 @@ By prioritizing certain experiences over others, we introduce bias into the lear
 2. The `IS` weight is calculated with `N * P`, where `N` is the total number of experiences in the buffer.
 3. If we want to introduce some bias back into the mix, we can add a new hyper-parameter beta `b`. By raising `IS` to the power of `b`, we can control how much bias we want to have, where `b = 1` fully compensates for the bias introduced by the priority experience replay.
 
-It makes sense that we might want more bias in the beginning of training since that's when we have the most to learn. And we would want to slowly temper the bias as we get closer to convergence. For this reason, I added a hyper-paramter for incrementing beta `bi` at each learning step. With `b = max(b + bi, 1)` the value of `b` will not go above 1.
+It makes sense that we might want more bias in the beginning of training since that's when we have the most to learn. And we would want to slowly temper the bias as we get closer to convergence. For this reason, I added a hyper-paramter `bi` for incrementing beta at each learning step. With `b = max(b + bi, 1)` the value of `b` will not go above 1.
+
+Finally, the `IS` weights are normalized by `IS / max(IS)`. This ensures that we only scale the update downwards.
+
+The final implementation can be seen below:
 
 **(1.6.1)**
 
 ```
-1. 	initialize max length N, and position H = -1
+1. 	initialize max length N, position H = -1, max priority MP = 10000, beta b and beta increment bi
 2. 	initialize buffer M = empty list
 3. 	initialize batch size B
 
-4. 	add experience E -> 
+4. 	add E -> 
 5. 		H 			= (H + 1) mod N
-6.		E 			-> into M at position H
+		E			-> add initial priority = MP to E. This ensures that each experience will be sampled
+6.		M 			-> add experience E into M at position H
 
 7. 	sample ->
 8.		initialize minibatch MB = empty list
-9.		for b = 1, B do
-10.			MB 		-> sample randomly from M and append to MB
+9.		b			= max(b + bi, 1) increment beta
+
+10.		for b = 1, B do
+11.			e		= sample experience by priority
+12.			P		= p(e) / sum(all p)
+13.			IS		= (N * P) ** -b
+14.			IS		= IS / max(IS) normalize weights
+15.			MB 		-> append (e, IS) to MB
 	
-11.		return MB
+16.		return MB
 ```
 
 For a more detailed explanation of prioritized experience replay, consult the paper [Prioritised Experience Replay](https://arxiv.org/abs/1511.05952).

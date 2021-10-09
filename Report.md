@@ -62,6 +62,7 @@ Once the buffer is full, new experience tuples are added to the beginning of the
 
 7. 	sample ->
 8.		initialize minibatch MB = empty list
+
 9.		for b = 1, B do
 10.			MB 		-> sample randomly from M and append to MB
 	
@@ -93,6 +94,7 @@ Pseudocode for the baseline DQN algorithm is as follows:
 4.	for episode 1, M do
 5.		s 				-> get initial state from environment
 6.		d 				= false
+
 7.		while not d
 8.			a 			-> with probability e select random a, otherwise max(DQN(s))
 9.			r, s_, d 		-> get (r, s_, d) from environment after executing a
@@ -100,12 +102,12 @@ Pseudocode for the baseline DQN algorithm is as follows:
 			
 11.			every k
 12.				s, a, r, s_ 	-> sample random minibatch of transitions from D
-13.				prediction 		-> predict s value - DQN(s)[a]
-14.				target 			-> get traget value - r + (gamma * max(DQN_(s_)) * (1 - d))
+13.				prediction 	-> predict s value - DQN(s)[a]
+14.				target 		-> get traget value - r + (gamma * max(DQN_(s_)) * (1 - d))
 
-15.				error 			-> calculate mean squared error - MSE(prediction, target)
-16.				update DQN		-> pass gradients w.r.t error through Adam optimizer
-17.				DQN_ 			-> perform a soft update of DQN_ from DQN
+15.				error 		-> calculate mean squared error - MSE(prediction, target)
+16.				update DQN	-> pass gradients w.r.t error through Adam optimizer
+17.				DQN_ 		-> perform a soft update of DQN_ from DQN
 ```
 
 The baseline agent was able to solve the environment in 1831 episodes.

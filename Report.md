@@ -154,7 +154,7 @@ The final priority `p` that we store is `(|td| + e) ** a`.
 #### a. Importance Sampling
 By prioritizing certain experiences over others, we introduce bias into the learning process. This is because the expectation of the data distribution changes. We can correct this by using importance-sampling `IS` weights.
 
-1. First, I calculate the sample probability `P = p(e) / sum(all p)`, where `e` is the experience and `p` is the priority.
+1. First, we calculate the sample probability `P = p(e) / sum(all p)`, where `e` is the experience and `p` is the priority.
 2. The `IS` weight is calculated with `N * P`, where `N` is the total number of experiences in the buffer.
 3. If we want to introduce some bias back into the mix, we can add a new hyper-parameter beta `b`. By raising `IS` to the power of `b`, we can control how much bias we want to have, where `b = 1` fully compensates for the bias introduced by the priority experience replay.
 

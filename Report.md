@@ -12,7 +12,7 @@ The world is solved once the agent has accumulated an average score of 13 over 1
 With the optimised implementation that I will outline in this report, I was able to train an agent to solve Banana world in just 381 episodes.
 
 ## 1. Implementation
-The baseline agent uses a `fixed Q target network` and an `Experience Replay` buffer. The replay buffer stores experience tuples of `(s, r, a, s_, d, idx)`. `d` is a flag denoting episode termination, and `idx` is the index of the tuple in the buffer. The `idx` will be useful later when I discuss `Prioritised Experience Replay`.
+The baseline agent uses a `fixed Q target network` and an `Experience Replay` buffer. The replay buffer stores experience tuples of `(s, r, a, s_, d)`. `d` is a flag denoting episode termination.
 
 In SL, we are able to train the agent towards a fixed target distribution that is known in advance. In RL, we don't have that luxury, and that is one of the first challenges we have to overcome. Because we are always training towards our next best guess and our best guess is always changing based on our previous training step, this causes a lot of variance when we are using the same online policy for making a prediction and estimating the value of that prediction.
 

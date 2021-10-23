@@ -5,7 +5,7 @@ The goal of this project is to build and train an agent that can solve Banana wo
 
 The agent has to navigate an open world with yellow and blue banana's scattered around. A reward of 1 is given for walking over a yellow banana and -1 for walking over a blue one.
 
-The world is solved once the agent has accumulated an average score of 13 over 100 episodes. An example of a trained agent can be seen below:
+The environment is solved once the agent has accumulated an average score of 13 over 100 episodes. An example of a trained agent can be seen below:
 
 ![trained agent](https://i.imgur.com/0JG7ud8.gif)
 
@@ -25,10 +25,10 @@ The idea here is that we have a separate DQN for estimating the target values in
 
 At fixed intervals we update the target weights with the learned weights and that way we hope to move our target closer to the true value function. By learning offline from a separate DQN, the goal is to reduce some of the variance and converge faster.
 
-In my implamentation, the separate `Neural Nets` are:
+In this report, the separate `Neural Nets` are referred to as:
 
--  `dqn_local`. This is the predictor network
--  `dqn_target`. This is the target network
+-  `DQN`. This is the predictor network
+-  `DQN_`. This is the target network
 
 The target network is updated at regular intervals.
 
@@ -43,7 +43,7 @@ The input and hidden layers pass through a `leaky_relu` activation function in t
 The output layer doesn't pass through an activation function.
 
 ### 1.2. Experience Replay Buffer
-The experience replay buffer is a list with a max length that stores experience tuples `(s, a, r, s_)`. At each time step, prediction is done using the Q network and the resulting experience tuple is stored in the replay buffer.
+The experience replay buffer is a list with a max length that stores experience tuples `(s, a, r, s_, d)`. At each time step, prediction is done using the local Q network and the resulting experience tuple is stored in the replay buffer.
 
 At regular intervals `k`, a batch of experience tuples is randomly sampled from the buffer and used to train the Q network.
 
@@ -75,13 +75,13 @@ All agents were trained with the following hyper-parameters:
 -  `lr = 0.001` 		learning rate
 -  `ep_start = 1` 		exploration start value
 -  `ep_min = 0.01`		exploration min value
--  `ep_decay = 0.99`	exploration decay modifier
--  `k = 4` 				learning interval
+-  `ep_decay = 0.99`		exploration decay modifier
+-  `k = 4` 			learning interval
 
 The error function was `mean squared error` for all agents and the optimizer algorithm was `Adam`.
 
 ### 1.4. Baseline DQN Algorithm
-Pseudocode for the baseline DQN algorithm is as follows:
+Pseudocode for the baseline DQN algorithm is:
 
 **(1.4.1)**
 
@@ -94,20 +94,23 @@ Pseudocode for the baseline DQN algorithm is as follows:
 4.	for episode 1, M do
 5.		s 				-> get initial state from environment
 6.		d 				= false
+7.		t				= 1
 
-7.		while not d
-8.			a 			-> with probability e select random a, otherwise max(DQN(s))
-9.			r, s_, d 		-> get (r, s_, d) from environment after executing a
-10.			D 			-> store transition tuple (s, a, r, s_, d) in D
+8.		while not d
+9.			e			= max(ep_start * (ep_decay ** t), ep_min) decay e to ep_min over time
+10.			a 			-> with probability e select random a, otherwise max(DQN(s))
+11.			r, s_, d 		-> get (r, s_, d) from environment after executing a
+12.			D 			-> append transition tuple (s, a, r, s_, d) to D
+13.			t			= t + 1
 			
-11.			every k
-12.				s, a, r, s_ 	-> sample random minibatch of transitions from D
-13.				prediction 	-> predict s value - DQN(s)[a]
-14.				target 		-> get traget value - r + (gamma * max(DQN_(s_)) * (1 - d))
+14.			every k
+15.				s, a, r, s_ 	-> sample minibatch of transitions from D
+16.				prediction 	-> predict s value - DQN(s)[a]
+17.				target 		-> get traget value - r + (gamma * max(DQN_(s_)) * (1 - d))
 
-15.				error 		-> calculate mean squared error - MSE(prediction, target)
-16.				update DQN	-> pass gradients w.r.t error through Adam optimizer
-17.				DQN_ 		-> perform a soft update of DQN_ from DQN
+18.				error 		-> calculate mean squared error - MSE(prediction, target)
+19.				update DQN	-> pass gradients w.r.t error through Adam optimizer
+20.				DQN_ 		-> perform a soft update of DQN_ from DQN
 ```
 
 The baseline agent was able to solve the environment in 1831 episodes.
@@ -121,15 +124,15 @@ The problem with using the `max Q values` from the target network is that any ta
 
 To reduce this bias, we can implement a `Double Q-Learning` algorithm for target approximation. A detailed explanation of `Double Q-Learning` can be found in the paper [Deep Reinforcement Learning with Double Q-learning](https://arxiv.org/abs/1509.06461).
 
-The implementation I used for a `DDQN` is the same as in **(1.4.1)**. The only difference is on line 15:
+The implementation I used for a `DDQN` is the same as in **(1.4.1)**. The only difference is on line 17:
 
 **(1.5.1)**
 
 ```
-14.				prediction 	-> predict s value - DQN(s)[a]
-15.				target 		-> get traget value - r + (gamma * DQN_(_s)[max(DQN(s_)] * (1 - d))
+16.				prediction 	-> predict s value - DQN(s)[a]
+17.				target 		-> get traget value - r + (gamma * DQN_(_s)[max(DQN(s_)] * (1 - d))
 
-16.				loss 		-> calculate mean squared error - MSE(prediction, target)
+18.				error 		-> calculate mean squared error - MSE(prediction, target)
 ```
 
 Instead of using `max(DQN_(s_))` to approximate the target value, I use `DQN_(_s)[max(DQN(s_)]`. First, the local Q network `DQN` is used to approximate the value of `s_` when taking `max(a)`, then the target Q network `DQN_` is used to evaluate `a` that was chosen by `DQN`. Hence the name `Double Q-Learning`. Using this algorithm has the effect of smoothing the bias introduced by errors in the approximation function.
@@ -212,4 +215,4 @@ Below is a side by side comparison of each agent learning to solve Banana world.
 ## 3. Ideas for the Future
 
 1. Dueling DQN architecture. [Dueling Network Architectures for Deep Reinforcement Learning](https://arxiv.org/abs/1511.06581)
-2. The agent seems to sometimes get stuck in a loop between 2 states. While I can sort of correct this by adding some stochasticity to the trained agent's actions, this doesn't seem ideal. If too much randomness is added, the agent's actions are too noisy and if too little, the agent will still get stuck. One idea I had was to intruduce previous observations into the agents overall observation space. So instead of only observing the state at `t`, the observation would be a concatenation of `t, t-1...t-n`. I'm not sure if this will work, but it seems to make sense since it's less like that the previous `n` observations will occur multiple times in that order.
+2. The agent seems to sometimes get stuck in a loop between 2 states. While I can sort of correct this by adding some stochasticity to the trained agent's actions, this doesn't seem ideal. If too much randomness is added, the agent's actions are too noisy and if too little, the agent will still get stuck. One idea I had was to intruduce previous observations into the agents overall observation space. So instead of only observing the state at `t`, the observation would be a concatenation of `t, t-1...t-n`. I'm not sure if this will work, but it seems to make sense since it's less likely that the previous `n` observations will occur multiple times in that order.
